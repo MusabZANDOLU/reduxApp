@@ -1,48 +1,47 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import CourseItem from "./CourseItem";
-import { clearCart } from "../control/cartSlice";
+import { removeCourse } from "../store/slices/courseSlice";
 
 function CourseList() {
-  const { cartItems, quantity, total } = useSelector((store) => store.cart);
   const dispatch = useDispatch();
-  return (
-    <>
-      {quantity < 1 ? (
-        <section>
-          <header>
-            <h2>Sepetim</h2>
-            <h4>Bomboş</h4>
-          </header>
-        </section>
-      ) : (
-        <section
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+  const { courses } = useSelector(({ form, courses: { data, searchTerm } }) => {
+    const filteredCourses = data.filter((course) =>
+      course.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return {
+      courses: filteredCourses,
+    };
+    // return state.courses.data;
+  });
+  const renderedCourses = courses.map((course) => {
+    return (
+      <div
+        key={course.id}
+        className="panel"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          borderRadius: "15px",
+          alignItems: "center",
+          padding: "10px",
+        }}
+      >
+        <h1>{course.name}</h1>
+        <p>{course.description}</p>
+        <p>{course.cost}</p>
+        <button
+          onClick={() => {
+            dispatch(removeCourse(course.id));
           }}
+          className="button is-danger"
         >
-          <header>
-            <h2>Sepetim</h2>
-          </header>
-          <div>
-            {cartItems.map((item, index) => {
-              return <CourseItem key={index} {...item} />;
-            })}
-          </div>
-          <footer>
-            <hr />
-            <div>
-              <h4>Toplam Tutar</h4>
-              <span>{total} TL</span>
-            </div>
-            <button onClick={() => dispatch(clearCart())}>Temizle</button>
-          </footer>
-        </section>
-      )}
-    </>
-  );
+          Sil
+        </button>
+      </div>
+    );
+  });
+  return <div className="courseList">{renderedCourses}</div>;
 }
 
 export default CourseList;
